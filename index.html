@@ -172,13 +172,12 @@ async function doLogin(){
       display_name:user.display_name,position:user.position,
       phone:user.phone,email:user.email,department:user.department
     });
-    // Use sessionStorage (clears on tab close)
-    sessionStorage.setItem('hm_session',JSON.stringify(session));
-    // Redirect
+    // Encode session as base64 token and pass via URL
+    var token=btoa(unescape(encodeURIComponent(JSON.stringify(session))));
     document.getElementById('overlay').classList.add('on');
     document.getElementById('spinTxt').textContent='Redirecting to '+selectedMod+'…';
     var dest=selectedMod==='tools'?'https://tools.huangmotor.com':'https://team.huangmotor.com';
-    setTimeout(function(){window.location.href=dest;},600);
+    setTimeout(function(){window.location.href=dest+'?token='+encodeURIComponent(token);},600);
   }catch(e){
     showErr('Connection error. Please try again.');
     btn.disabled=false;btn.textContent='Sign In';
