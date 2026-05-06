@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HuangMotor — Sign In</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>">
+<meta name="theme-color" content="#0a0f1a">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0f1a;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.wrap{width:100%;max-width:400px}
+
+/* brand */
+.brand{text-align:center;margin-bottom:2rem}
+.brand-icon{font-size:44px;display:block;margin-bottom:.5rem}
+.brand-name{font-size:20px;font-weight:800;color:#f0f6fc;letter-spacing:-.3px}
+.brand-sub{font-size:11px;color:#2a4a6a;margin-top:4px;letter-spacing:.06em;text-transform:uppercase}
+
+/* module selector */
+.modules{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.2rem}
+.mod-btn{background:#111827;border:2px solid #1e2d45;border-radius:12px;padding:1.1rem .8rem;cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden}
+.mod-btn:hover{border-color:#3b82f6;transform:translateY(-1px)}
+.mod-btn.selected{border-color:#3b82f6;background:#0d1e35}
+.mod-btn.green:hover,.mod-btn.green.selected{border-color:#10b981;background:#0d2318}
+.mod-btn-icon{font-size:26px;display:block;margin-bottom:.4rem}
+.mod-btn-title{font-size:13px;font-weight:700;color:#f0f6fc}
+.mod-btn-desc{font-size:10px;color:#4a6fa5;margin-top:2px;line-height:1.4}
+.mod-check{position:absolute;top:8px;right:8px;font-size:14px;color:#3b82f6;display:none}
+.mod-btn.selected .mod-check{display:block}
+.mod-btn.green .mod-check{color:#10b981}
+
+/* login card */
+.card{background:#111827;border:1px solid #1e2d45;border-radius:14px;padding:1.6rem}
+.card-title{font-size:13px;font-weight:600;color:#6b8ab0;margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+.card-title span{color:#f0f6fc}
+.field{margin-bottom:.9rem}
+.field label{font-size:11px;color:#6b8ab0;display:block;margin-bottom:4px}
+.field input{width:100%;padding:10px 12px;border:1px solid #1e2d45;border-radius:8px;font-size:13px;background:#0d1626;color:#e0e6f0;outline:none;transition:border-color .2s}
+.field input:focus{border-color:#3b82f6}
+.sign-btn{width:100%;padding:11px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:.4rem;transition:all .2s;color:#fff;background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
+.sign-btn:disabled{opacity:.4;cursor:not-allowed}
+.sign-btn:not(:disabled):hover{opacity:.88;transform:translateY(-1px)}
+.err{font-size:11px;color:#f87171;margin-top:8px;min-height:16px;text-align:center}
+.hint{font-size:10px;color:#1e2d45;text-align:center;margin-top:1rem}
+
+/* loading */
+#overlay{display:none;position:fixed;inset:0;background:#0a0f1a;z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:10px}
+#overlay.on{display:flex}
+.spin{width:28px;height:28px;border:3px solid #1e2d45;border-top-color:#3b82f6;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.spin-txt{font-size:12px;color:#4a6fa5}
+
+@media(max-width:360px){.modules{grid-template-columns:1fr}.mod-btn{display:flex;align-items:center;gap:10px;text-align:left}.mod-btn-icon{margin-bottom:0;font-size:22px}}
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div class="spin"></div>
+  <div class="spin-txt" id="spinTxt">Signing in…</div>
+</div>
+
+<div class="wrap">
+  <div class="brand">
+    <span class="brand-icon">🏍️</span>
+    <div class="brand-name">HuangMotor M Sdn Bhd</div>
+    <div class="brand-sub">Internal Platform</div>
+  </div>
+
+  <div class="modules">
+    <div class="mod-btn" id="mod-tools" onclick="selectMod('tools')">
+      <span class="mod-check">✓</span>
+      <span class="mod-btn-icon">🔧</span>
+      <div class="mod-btn-title">Tools</div>
+      <div class="mod-btn-desc">Generator & Pricelist</div>
+    </div>
+    <div class="mod-btn green" id="mod-team" onclick="selectMod('team')">
+      <span class="mod-check">✓</span>
+      <span class="mod-btn-icon">👥</span>
+      <div class="mod-btn-title">Team</div>
+      <div class="mod-btn-desc">Portal & Management</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sign in to <span id="modLabel">—</span></div>
+    <div class="field">
+      <label>Username</label>
+      <input id="uInp" type="text" placeholder="Enter username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="pInp" type="password" placeholder="••••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="sign-btn" id="signBtn" onclick="doLogin()" disabled>Select a module above</button>
+    <div class="err" id="errMsg"></div>
+  </div>
+
+  <div class="hint">© 2026 HuangMotor M Sdn Bhd · All rights reserved</div>
+</div>
+
+<script>
+var SB='https://rjcudrhvfiyqslsvkori.supabase.co';
+var KEY='sb_publishable_FgP66Vojgzp78hoFV6Zdaw_ZMqd__r3';
+var selectedMod=null;
+
+function h(s){return sbH=Object.assign({'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},s||{});}
+
+async function sha256(msg){
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
+function selectMod(m){
+  selectedMod=m;
+  document.querySelectorAll('.mod-btn').forEach(function(b){b.classList.remove('selected');});
+  document.getElementById('mod-'+m).classList.add('selected');
+  var labels={tools:'Tools',team:'Team'};
+  document.getElementById('modLabel').textContent=labels[m]||m;
+  var btn=document.getElementById('signBtn');
+  btn.disabled=false;btn.textContent='Sign In';
+  document.getElementById('uInp').focus();
+}
+
+async function doLogin(){
+  if(!selectedMod)return;
+  var u=(document.getElementById('uInp').value||'').trim();
+  var p=document.getElementById('pInp').value||'';
+  if(!u||!p){document.getElementById('errMsg').textContent='Please enter username and password.';return;}
+  var btn=document.getElementById('signBtn');
+  btn.disabled=true;btn.textContent='Signing in…';
+  document.getElementById('errMsg').textContent='';
+  try{
+    var hash=await sha256(p);
+    var r=await fetch(SB+'/rest/v1/users?username=eq.'+encodeURIComponent(u)+'&select=username,role,password_hash,is_active,locked_until,can_access_tools,can_access_team,can_access_partner,can_edit_pricelist,can_edit_generator,can_edit_mf,is_viewer_mode,display_name,position,phone,email,department',{headers:h()});
+    var rows=await r.json();
+    if(!rows.length){showErr('Invalid username or password.');btn.disabled=false;btn.textContent='Sign In';return;}
+    var user=rows[0];
+    // Check locked
+    if(user.locked_until&&new Date(user.locked_until)>new Date()){
+      var mins=Math.ceil((new Date(user.locked_until)-new Date())/60000);
+      showErr('Account locked. Try again in '+mins+' min.');btn.disabled=false;btn.textContent='Sign In';return;
+    }
+    // Check password
+    if(user.password_hash!==hash){
+      // Increment failed attempts
+      var attempts=(user.failed_attempts||0)+1;
+      var lockData={failed_attempts:attempts};
+      if(attempts>=5)lockData.locked_until=new Date(Date.now()+15*60000).toISOString();
+      await fetch(SB+'/rest/v1/users?username=eq.'+encodeURIComponent(u),{method:'PATCH',headers:h({'Prefer':'return=minimal'}),body:JSON.stringify(lockData)});
+      var left=5-attempts;
+      showErr('Invalid username or password.'+(left>0?' ('+left+' attempts left)':' Account locked for 15 min.'));
+      btn.disabled=false;btn.textContent='Sign In';return;
+    }
+    if(user.is_active===false){showErr('Account is disabled. Contact Admin.');btn.disabled=false;btn.textContent='Sign In';return;}
+    // Check module access
+    var accessKey='can_access_'+selectedMod;
+    if(user.role!=='admin'&&!user[accessKey]){
+      showErr('You do not have access to '+selectedMod.charAt(0).toUpperCase()+selectedMod.slice(1)+'.');
+      btn.disabled=false;btn.textContent='Sign In';return;
+    }
+    // Reset failed attempts, update last login
+    await fetch(SB+'/rest/v1/users?username=eq.'+encodeURIComponent(u),{method:'PATCH',headers:h({'Prefer':'return=minimal'}),body:JSON.stringify({failed_attempts:0,locked_until:null,last_login:new Date().toISOString()})});
+    // Store session and redirect
+    var session={username:user.username,role:user.role,module:selectedMod,ts:Date.now()};
+    Object.assign(session,{
+      can_access_tools:user.can_access_tools,can_access_team:user.can_access_team,
+      can_edit_pricelist:user.can_edit_pricelist,can_edit_generator:user.can_edit_generator,
+      can_edit_mf:user.can_edit_mf,is_viewer_mode:user.is_viewer_mode,
+      display_name:user.display_name,position:user.position,
+      phone:user.phone,email:user.email,department:user.department
+    });
+    // Use sessionStorage (clears on tab close)
+    sessionStorage.setItem('hm_session',JSON.stringify(session));
+    // Redirect
+    document.getElementById('overlay').classList.add('on');
+    document.getElementById('spinTxt').textContent='Redirecting to '+selectedMod+'…';
+    var dest=selectedMod==='tools'?'https://tools.huangmotor.com':'https://team.huangmotor.com';
+    setTimeout(function(){window.location.href=dest;},600);
+  }catch(e){
+    showErr('Connection error. Please try again.');
+    btn.disabled=false;btn.textContent='Sign In';
+  }
+}
+
+function showErr(msg){document.getElementById('errMsg').textContent=msg;}
+</script>
+</body>
+</html>
